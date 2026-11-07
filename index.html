@@ -581,9 +581,11 @@ function backupStatus(){
 function initLocal(){
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {}); } catch(e){}
   backupStatus();
-  if ('serviceWorker' in navigator && location.protocol === 'https:'){
-    navigator.serviceWorker.register('sw.js').catch(() => {});
-  }
+  // remove any offline worker left from an older version
+  try {
+    if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister())).catch(() => {});
+    if (window.caches) caches.keys().then(ks => ks.forEach(k => caches.delete(k))).catch(() => {});
+  } catch(e){}
 }
 async function saveBackup(){
   const msg = $('#importMsg');
